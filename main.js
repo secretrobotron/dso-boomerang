@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
- 
+
 (function () {
 
   NUM_IMAGES_TO_DISPLAY = 16;
@@ -132,14 +132,8 @@
     }
   ];
   
-  document.addEventListener('DOMContentLoaded', function (e) {
-
+  function start(imagePool) {
     var imageParentNode = document.body;
-    var imagePool = imageParentNode.querySelectorAll('.media-container');
-
-    Array.prototype.forEach.call(imagePool, function (image) {
-      imageParentNode.removeChild(image);
-    });
 
     function getRandomizedImageQueue() {
       var chosenIndices = [];
@@ -178,6 +172,37 @@
 
     next();
     
+  }
+
+  function placeImages(jsonData) {
+    var imageJSON = JSON.parse(jsonData);
+
+    var imagePool = [];
+
+    imageJSON.forEach(function (imageDesc) {
+      var imageContainer = document.createElement('div');
+      var image = document.createElement('div');
+      image.style.backgroundImage = 'url("' + imageDesc.src + '")';
+      image.style.backgroundPosition = imageDesc.x + ' ' + imageDesc.y;
+      imageContainer.classList.add('media-container');
+      image.classList.add('media');
+      imageContainer.appendChild(image);
+      imagePool.push(imageContainer);
+    });
+
+    return imagePool;
+  }
+
+  document.addEventListener('DOMContentLoaded', function (e) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'images.json');
+
+    xhr.onload = function () {
+      start(placeImages(xhr.response));
+    };
+
+    xhr.send();
   });
+
 
 })();
